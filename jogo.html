@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="jogo.js"></script>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <title>Minha Engine</title>
+    <title>jogo sem nome kk</title>
 <style>
     canvas {
         position: absolute;
@@ -13,7 +15,7 @@
         bottom: 0px;
         left: 0px;
         right: 0px;
-        margin: auto;
+        margin: auto; 
 }
     </style>
 </head>
@@ -22,21 +24,25 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-    
-    <header class="header bg-white">
-    <div class="container text-center">
-            
-        <h3 class="title">Jogo que não tem nome ainda</h3>
+
     <div class="text-center">
     <button class="btn btn-dark" href="">Como jogar</button>
     </div>
-</div>
             
-        </header>
+    </header>
         <div class="clear"></div>
+        
+
 <script>
 // variáveis do jogo
-var canvas, ctx, ALTURA, LARGURA, frames = 0, maxPulos = 5,velocidade = 6,
+var canvas, ctx, ALTURA, LARGURA, frames = 0, maxPulos = 3,velocidade = 6,
+    estadoAtual, recorde, img, 
+
+    estados = {
+        jogar: 0,
+        jogando: 1,
+        perdeu: 2
+    },
 
     chao = {
     y: 550,
@@ -48,6 +54,61 @@ desenha: function() {
     ctx.fillRect(0, this.y, LARGURA, this.altura);
    }
 },
+
+blocoAlto = {
+    bloc: [],
+    cores: ["#ffbc1c", "#ff1c1c", "#ff85e1", "#52a7ff", "#78ff5d"],
+    tempInsere: 0,
+
+insere: function() {
+    this.bloc.push({
+    gravidaty: 1,
+    x: ALTURA,
+    largura: 50,
+    //altura: 30 + Math.floor(120 * Math.random()),
+    largura : 30,
+    cor: this.cores[Math.floor(5 * Math.random())]
+});
+    
+this.tempInsere = 50 + Math.floor(20 * Math.random());
+},
+   
+atualiza: function() {
+    if (this.tempInsere == 0)
+        this.insere();
+    else
+        this.tempInsere--;     
+   
+    for (var i = 0, tam = this.bloc.length; i < tam; i++) {
+        var b = this.bloc[i];
+     
+        b.x -= velocidade;
+        
+        if (bloco.x < b.x + b.largura && bloco.x + bloco.largura >= 
+            b.x && bloco.y + bloco.largura >= chao.y - b.altura) 
+                estadoAtual = estados.perdeu;
+        else if (b.x == 0)
+            bloco.score++;
+        
+        else if (b.x <= -b.largura){
+        this.bloc.splice(i, 1);
+            tam--;
+            i--;
+        }
+    }
+},
+limpa: function (){
+    this.bloc = [];
+},
+   
+desenha: function() {
+    for (var i = 0, tam = this.bloc.length; i < tam; i++) {
+        var b = this.bloc[i];
+    ctx.fillStyle = b.cor;
+    ctx.fillRect(b.x, chao.y - b.altura, b.largura, b.altura);
+        }
+    }
+}
   
 bloco = {
     x: 50,
@@ -59,14 +120,16 @@ bloco = {
     velocidade: 0,
     forcaDoPulo: 25,
     qntPulos: 0,
+    score: 0,
    
 atualiza: function() {
     this.velocidade += this.gravidade;
     this.y += this.velocidade;
     
-if (this.y > chao.y - this.altura) {
+if (this.y > chao.y - this.altura && estadoAtual != estados.perdeu) {
     this.y = chao.y - this.altura
-     this.qntPulos = 0;
+    this.qntPulos = 0;
+    this.velocidade = 0; 
     }
 },
    
@@ -75,6 +138,17 @@ if (this.qntPulos - maxPulos) {
     this.velocidade = -this.forcaDoPulo;
     this.qntPulos++; 
     }  
+},
+reset: function () {
+    this.velocidade = 0;
+    this.y = 0;
+
+    if (this.score > recorde) {
+        localStorage.setItem('recorde', this.score)
+        recorde = this.score;
+    }
+
+    this.score = 0;
 },
    
 desenha: function() {
@@ -87,16 +161,31 @@ obstaculos = {
     _obs: [],
     cores: ["#ffbc1c", "#ff1c1c", "#ff85e1", "#52a7ff", "#78ff5d"],
     tempoInsere: 0,
+    letra: [],
+    alfabeto: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
+                'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
+                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+
+insereLetra: function () {
+    this.letra.push({
+        x: ALTURA,
+        largura: 30 + Math.floor(21 * Math.random),
+        letra: this.alfabeto[Math.floor(5 * Math.random())]
+    });
+    this.tempoInsere = 50 + Math.floor(20 * Math.random());
+    console.log(alfabeto);
+},
    
 insere: function() {
     this._obs.push({
     x: ALTURA,
-    largura: 30 + Math.floor(21 * Math.random()),
+    //largura: 30 + Math.floor(21 * Math.random()),
+    largura: 50,
     altura: 30 + Math.floor(120 * Math.random()),
     cor: this.cores[Math.floor(5 * Math.random())]
 });
     
-this.tempoInsere = 30 + Math.floor(20 * Math.random());
+this.tempoInsere = 50 + Math.floor(20 * Math.random());
 },
    
 atualiza: function() {
@@ -108,14 +197,23 @@ atualiza: function() {
     for (var i = 0, tam = this._obs.length; i < tam; i++) {
         var obs = this._obs[i];
      
-     obs.x -= velocidade;
-     
-    if (obs.x <= -obs.largura){
-         this._obs.splice(i, 1);
-      tam--;
-      i--;
+        obs.x -= velocidade;
+        
+        if (bloco.x < obs.x + obs.largura && bloco.x + bloco.largura >= 
+            obs.x && bloco.y + bloco.largura >= chao.y - obs.altura) 
+                estadoAtual = estados.perdeu;
+        else if (obs.x == 0)
+            bloco.score++;
+        
+        else if (obs.x <= -obs.largura){
+        this._obs.splice(i, 1);
+            tam--;
+            i--;
         }
     }
+},
+limpa: function (){
+    this._obs = [];
 },
    
 desenha: function() {
@@ -128,7 +226,26 @@ desenha: function() {
 };
   
 function clique(event) {
-    bloco.pula();
+    if (estadoAtual == estados.jogando) 
+        bloco.pula();
+    else if (estadoAtual == estados.jogar) {
+        estadoAtual = estados.jogando;
+    }
+    else if (estadoAtual == estados.perdeu && bloco.y >= 2 * ALTURA) {
+        estadoAtual = estados.jogar;
+        obstaculos.limpa();
+        bloco.reset();
+    }
+}
+function tecla (event) {
+    if ( 40 in tecla)
+        bloco.pula();
+    if (38 in tecla) 
+        bloco.pula();
+    if (37 in tecla) 
+        bloco.pula();
+    if (39 in tecla)
+        bloco.pula();
 }
 
 function main() {
@@ -150,6 +267,13 @@ ctx = canvas.getContext("2d");
 document.body.appendChild(canvas);
 
 document.addEventListener("mousedown",clique);
+document.addEventListener('keydown', tecla)
+
+estadoAtual = estados.jogar;
+recorde = localStorage.getItem('recorde');
+
+if (recorde == null)
+    recorde = 0;
 
 roda();
 } // main
@@ -163,18 +287,66 @@ function roda() {
 
 function atualiza() {
     frames++;
-  
     bloco.atualiza();
-    obstaculos.atualiza();
+    
+    if (estadoAtual == estados.jogando) {
+        obstaculos.atualiza(); 
+    }
+    /*else if (estadoAtual == estados.perdeu) {
+      // obstaculos.limpa();
+    }*/
 }
 
 function desenha() {
     ctx.fillStyle = "#50beff"
     ctx.fillRect(0, 0, LARGURA, ALTURA)
+    
+    ctx.fillStyle = 'white';
+    ctx.font = '35px arial';
+    ctx.fillText(bloco.score, 30, 68);
+
+    if (estadoAtual == estados.jogar) {
+        ctx.fillStyle = 'green';
+        ctx.fillRect (LARGURA / 2 - 50, ALTURA / 2 -50, 100,100);
+    }
+    else if (estadoAtual == estados.perdeu) {
+        ctx.fillStyle = 'red';
+        ctx.fillRect (LARGURA / 2 - 50, ALTURA / 2 -50, 100,100);
+
+        ctx.save();
+        ctx.translate(LARGURA/2, ALTURA/2);
+        ctx.fillStyle = 'white';
+
+        if (bloco.score > recorde)
+            ctx.fillText('Novo Record!', -130, -55);
+
+        else if (recorde < 10)
+            ctx.fillText('Maior Pontuação ' + recorde, -99, -65);
+        
+        else if (recorde >=  10 && recorde < 100)
+            ctx.fillText('Maior Pontuação ' + recorde, -112, -65);
+
+        else
+            ctx.fillText('Maior Pontuação ' + recorde, -125, -65)
+
+        if (bloco.score < 10)
+            ctx.fillText(bloco.score, -13, 19);
+        else if (bloco.score >= 10 && bloco.score < 100)
+            ctx.fillText(bloco.score, -26,19);
+        
+        else ctx.fillText(bloco.score, -39, 19);
+        
+        ctx.restore();
+
+    }
+    else if (estadoAtual == estados.jogando) {
+        obstaculos.desenha();
+    }
   
     chao.desenha();
     obstaculos.desenha();
     bloco.desenha();
+    
 }
 
 // inicializa o jogo
