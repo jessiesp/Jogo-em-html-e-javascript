@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <script src="jogo.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="jogo.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <title>jogo sem nome kk</title>
+    <script src="Sprite.js"></script>
+    <script src="SpriteO.js"></script>
 <style>
     canvas {
         position: absolute;
@@ -26,7 +27,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
     <div class="text-center">
-    <button class="btn btn-dark" href="">Como jogar</button>
+    <button class="btn btn-dark" href="" style="font-family: jellycrazies">Como jogar</button>
     </div>
             
     </header>
@@ -36,7 +37,7 @@
 <script>
 // variáveis do jogo
 var canvas, ctx, ALTURA, LARGURA, frames = 0, maxPulos = 3,velocidade = 6,
-    estadoAtual, recorde, img, 
+    estadoAtual, recorde, img, imgBoneco,imgObs,
 
     estados = {
         jogar: 0,
@@ -46,8 +47,8 @@ var canvas, ctx, ALTURA, LARGURA, frames = 0, maxPulos = 3,velocidade = 6,
 
     chao = {
     y: 550,
-    altura: 50,
-    cor: "#ffdf70",
+    altura: 10,
+    cor: "#FAE4Bf",
    
 desenha: function() {
     ctx.fillStyle = this.cor;
@@ -113,11 +114,11 @@ desenha: function() {
 bloco = {
     x: 50,
     y: 0,
-    altura: 50,
-    largura: 50,
+    altura: spriteBoneco.altura,
+    largura: spriteBoneco.largura,
     cor: "#ff4e4e",
-    gravidade: 2.5,
-    velocidade: 0,
+    gravidade: 1.5,
+    velocidade: 4,
     forcaDoPulo: 25,
     qntPulos: 0,
     score: 0,
@@ -150,42 +151,48 @@ reset: function () {
 
     this.score = 0;
 },
-   
 desenha: function() {
-    ctx.fillStyle = this.cor;
-    ctx.fillRect(this.x, this.y, this.altura, this.largura);
-   }
+  if (this.y < chao.altura + 250) {
+    spriteBonecoPula.desenha(this.x, this.y)
+    
+      
+  } else {
+    
+    spriteBoneco.desenha(this.x, this.y)
+  } 
+
+}
 },
   
 obstaculos = {
     _obs: [],
-    cores: ["#ffbc1c", "#ff1c1c", "#ff85e1", "#52a7ff", "#78ff5d"],
+    sprites: [spriteObs1, spriteObs2, spriteObs3, spriteObs4, spriteObs5,spriteObs6, spriteObs7, spriteObs8, spriteObs9],
     tempoInsere: 0,
     letra: [],
     alfabeto: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
                 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
                 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
 
-insereLetra: function () {
+/*insereLetra: function () {
     this.letra.push({
         x: ALTURA,
         largura: 30 + Math.floor(21 * Math.random),
-        letra: this.alfabeto[Math.floor(5 * Math.random())]
+        sprites: this.sprites[Math.floor(sprites.length * Math.random())]
     });
     this.tempoInsere = 50 + Math.floor(20 * Math.random());
     console.log(alfabeto);
-},
+},*/
    
 insere: function() {
     this._obs.push({
-    x: ALTURA,
-    //largura: 30 + Math.floor(21 * Math.random()),
-    largura: 50,
+    x: 700,
+    y: 420,
+    largura: 40,
     altura: 30 + Math.floor(120 * Math.random()),
-    cor: this.cores[Math.floor(5 * Math.random())]
+    sprite: this.sprites[Math.floor(this.sprites.length * Math.random())]
 });
     
-this.tempoInsere = 50 + Math.floor(20 * Math.random());
+this.tempoInsere = 80 + Math.floor(20 * Math.random());
 },
    
 atualiza: function() {
@@ -198,11 +205,11 @@ atualiza: function() {
         var obs = this._obs[i];
      
         obs.x -= velocidade;
-        
+        console.log(obs.x)
         if (bloco.x < obs.x + obs.largura && bloco.x + bloco.largura >= 
             obs.x && bloco.y + bloco.largura >= chao.y - obs.altura) 
                 estadoAtual = estados.perdeu;
-        else if (obs.x == 0)
+        else if (obs.x == 4) // 
             bloco.score++;
         
         else if (obs.x <= -obs.largura){
@@ -218,10 +225,10 @@ limpa: function (){
    
 desenha: function() {
     for (var i = 0, tam = this._obs.length; i < tam; i++) {
-        var obs = this._obs[i];
-    ctx.fillStyle = obs.cor;
-    ctx.fillRect(obs.x, chao.y - obs.altura, obs.largura, obs.altura);
-        }
+        var obj = this._obs[i];
+        
+        obj.sprite.desenha(obj.x,obj.y);
+    } 
     }
 };
   
@@ -253,7 +260,7 @@ function main() {
     LARGURA = window.innerWidth;
 
     if (LARGURA >= 600) {
-        LARGURA = 600;
+        LARGURA = 800;
         ALTURA  = 600;
 }
 
@@ -274,6 +281,12 @@ recorde = localStorage.getItem('recorde');
 
 if (recorde == null)
     recorde = 0;
+
+    imgBoneco = new Image();
+    imgBoneco.src='img/sheet.png'
+
+    imgObs = new Image();
+    imgObs.src='img/obs.png'
 
 roda();
 } // main
@@ -298,11 +311,12 @@ function atualiza() {
 }
 
 function desenha() {
-    ctx.fillStyle = "#50beff"
-    ctx.fillRect(0, 0, LARGURA, ALTURA)
+    var img = new Image(800, 800);
+        img.src = "img/rio.png";
+        ctx.drawImage(img, 0, 0, 800, 600);
     
     ctx.fillStyle = 'white';
-    ctx.font = '35px arial';
+    ctx.font = "20px jellycrazies";
     ctx.fillText(bloco.score, 30, 68);
 
     if (estadoAtual == estados.jogar) {
@@ -318,16 +332,16 @@ function desenha() {
         ctx.fillStyle = 'white';
 
         if (bloco.score > recorde)
-            ctx.fillText('Novo Record!', -130, -55);
+            ctx.fillText('NOVO RECORDE', -130, -55);
 
         else if (recorde < 10)
-            ctx.fillText('Maior Pontuação ' + recorde, -99, -65);
+            ctx.fillText('RECORDE   ' + recorde, -99, -65);
         
         else if (recorde >=  10 && recorde < 100)
-            ctx.fillText('Maior Pontuação ' + recorde, -112, -65);
+            ctx.fillText('RECORDE  ' + recorde, -112, -65);
 
         else
-            ctx.fillText('Maior Pontuação ' + recorde, -125, -65)
+            ctx.fillText('RECORDE   ' + recorde, -125, -65)
 
         if (bloco.score < 10)
             ctx.fillText(bloco.score, -13, 19);

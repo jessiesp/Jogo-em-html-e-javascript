@@ -1,0 +1,7 @@
+@font-face {
+  font-family: "jellycrazies";
+  src: url("font/JellyCrazies.ttf");
+}
+* {
+  font-family: jellycrazies;
+}
