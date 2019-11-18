@@ -32,6 +32,12 @@
             
     </header>
         <div class="clear"></div>
+
+    <div class="controls" id="menu-buttons">
+			<a class="button" id="newGame">Jogar</a>
+			<a class="button" id="highscore">Records</a>
+			
+    </div>
         
 
 <script>
@@ -42,7 +48,8 @@ var canvas, ctx, ALTURA, LARGURA, frames = 0, maxPulos = 3,velocidade = 6,
     estados = {
         jogar: 0,
         jogando: 1,
-        perdeu: 2
+        perdeu: 2,
+        pausado: 3
     },
 
     chao = {
@@ -55,61 +62,6 @@ desenha: function() {
     ctx.fillRect(0, this.y, LARGURA, this.altura);
    }
 },
-
-blocoAlto = {
-    bloc: [],
-    cores: ["#ffbc1c", "#ff1c1c", "#ff85e1", "#52a7ff", "#78ff5d"],
-    tempInsere: 0,
-
-insere: function() {
-    this.bloc.push({
-    gravidaty: 1,
-    x: ALTURA,
-    largura: 50,
-    //altura: 30 + Math.floor(120 * Math.random()),
-    largura : 30,
-    cor: this.cores[Math.floor(5 * Math.random())]
-});
-    
-this.tempInsere = 50 + Math.floor(20 * Math.random());
-},
-   
-atualiza: function() {
-    if (this.tempInsere == 0)
-        this.insere();
-    else
-        this.tempInsere--;     
-   
-    for (var i = 0, tam = this.bloc.length; i < tam; i++) {
-        var b = this.bloc[i];
-     
-        b.x -= velocidade;
-        
-        if (bloco.x < b.x + b.largura && bloco.x + bloco.largura >= 
-            b.x && bloco.y + bloco.largura >= chao.y - b.altura) 
-                estadoAtual = estados.perdeu;
-        else if (b.x == 0)
-            bloco.score++;
-        
-        else if (b.x <= -b.largura){
-        this.bloc.splice(i, 1);
-            tam--;
-            i--;
-        }
-    }
-},
-limpa: function (){
-    this.bloc = [];
-},
-   
-desenha: function() {
-    for (var i = 0, tam = this.bloc.length; i < tam; i++) {
-        var b = this.bloc[i];
-    ctx.fillStyle = b.cor;
-    ctx.fillRect(b.x, chao.y - b.altura, b.largura, b.altura);
-        }
-    }
-}
   
 bloco = {
     x: 50,
@@ -168,12 +120,12 @@ obstaculos = {
     _obs: [],
     sprites: [spriteObs1, spriteObs2, spriteObs3, spriteObs4, spriteObs5,spriteObs6, spriteObs7, spriteObs8, spriteObs9],
     tempoInsere: 0,
-    letra: [],
-    alfabeto: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
+    //letra: [],
+    /*alfabeto: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 
                 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 
                 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
 
-/*insereLetra: function () {
+    insereLetra: function () {
     this.letra.push({
         x: ALTURA,
         largura: 30 + Math.floor(21 * Math.random),
@@ -231,6 +183,7 @@ desenha: function() {
     } 
     }
 };
+
   
 function clique(event) {
     if (estadoAtual == estados.jogando) 
@@ -244,16 +197,7 @@ function clique(event) {
         bloco.reset();
     }
 }
-function tecla (event) {
-    if ( 40 in tecla)
-        bloco.pula();
-    if (38 in tecla) 
-        bloco.pula();
-    if (37 in tecla) 
-        bloco.pula();
-    if (39 in tecla)
-        bloco.pula();
-}
+
 
 function main() {
     ALTURA  = window.innerHeight;
@@ -273,8 +217,35 @@ ctx = canvas.getContext("2d");
 
 document.body.appendChild(canvas);
 
-document.addEventListener("mousedown",clique);
-document.addEventListener('keydown', tecla)
+document.addEventListener("mousedown", clique);
+document.addEventListener("keypress", function (enter) {
+    if (enter.keyCode == 13) {
+    estadoAtual = estados.jogando;
+    }
+    else if (estadoAtual == estados.jogar)
+    estadoAtual = estados.jogando;
+}) 
+document.addEventListener("keypress", function (space) {
+    if (space.keyCode == 32) {
+    estadoAtual = estados.pausado;
+    }
+    else if (space.keyCode == 32)
+    estadoAtual = estados.jogando;
+    
+})
+document.addEventListener("keydown", function (teclas) {
+    if (teclas.keyCode == 38) {
+        bloco.pula();
+    }
+    if (teclas.keyCode == 87) {
+        bloco.pula();
+    }
+    if (teclas.keyCode == 80) {
+        bloco.pula();
+    }
+})
+
+
 
 estadoAtual = estados.jogar;
 recorde = localStorage.getItem('recorde');
@@ -316,20 +287,22 @@ function desenha() {
         ctx.drawImage(img, 0, 0, 800, 600);
     
     ctx.fillStyle = 'white';
-    ctx.font = "20px jellycrazies";
     ctx.fillText(bloco.score, 30, 68);
 
     if (estadoAtual == estados.jogar) {
         ctx.fillStyle = 'green';
-        ctx.fillRect (LARGURA / 2 - 50, ALTURA / 2 -50, 100,100);
+        ctx.font = "50px arial"
+        ctx.fillText('Jogar', LARGURA / 2 - 50, ALTURA / 2 -50)
     }
     else if (estadoAtual == estados.perdeu) {
         ctx.fillStyle = 'red';
-        ctx.fillRect (LARGURA / 2 - 50, ALTURA / 2 -50, 100,100);
-
+        ctx.font = "35px arial"
+        ctx.fillText('Perdeu', LARGURA / 2 - 25, ALTURA / 2 -25);
+        
         ctx.save();
         ctx.translate(LARGURA/2, ALTURA/2);
         ctx.fillStyle = 'white';
+        ctx.font = "50px arial"
 
         if (bloco.score > recorde)
             ctx.fillText('NOVO RECORDE', -130, -55);
@@ -352,6 +325,11 @@ function desenha() {
         
         ctx.restore();
 
+    }
+    else if (estadoAtual == estados.pausado) {
+        ctx.fillStyle = 'yellow';
+        ctx.font = "22px arial"
+        ctx.fillText('Jogo pausado, para retomar pressione a tecla Enter!', LARGURA / 4 - 50, ALTURA / 2 -50)
     }
     else if (estadoAtual == estados.jogando) {
         obstaculos.desenha();
