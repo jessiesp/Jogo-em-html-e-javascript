@@ -21,7 +21,7 @@
     </style>
 </head>
 
-<body>
+<body onload="atualiza_tempo();">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
@@ -32,17 +32,29 @@
             
     </header>
         <div class="clear"></div>
+        <div id="game">
+            <div id="" style="z-index:1;">
+            <p style="color:black; text-align:center;" id="display_tempo"></p>
+            </div>
+            <div id="square0"></div>
+            <div id="square1"></div>
+            <div id="notepad"></div>
+            <div id="pad"></div>
+          </div>
         
 <script>
 // variáveis do jogo
 var canvas, ctx, ALTURA, LARGURA, frames = 0, maxPulos = 3,velocidade = 6,
-    estadoAtual, recorde, img, imgBoneco,imgObs, imgInicio,
-
+    estadoAtual, recorde, img, imgBoneco,imgObs, imgInicio, 
+    tempo = 0, 
+    tempo_controle = 0, 
+    parado = 1,
+    ativo = false,
     estados = {
         jogar: 0,
         jogando: 1,
         perdeu: 2,
-        pausado: 3
+        pausado: 3,
     },
 
     chao = {
@@ -160,9 +172,22 @@ desenha: function() {
         
         obj.sprite.desenha(obj.x,obj.y);
     } 
-    }
-};
+},
 
+};
+function atualiza_tempo() {
+    if (estadoAtual == estados.jogar)
+        ativo = true;
+    else if (estadoAtual == estados.jogando) {
+    var tempo_segundos = Math.floor((new Date() - tempo) / 1000);
+    var display = tempo_segundos.toString() + 'segundos';
+    document.getElementById('display_tempo').innerHTML = display;
+    }
+    else if (estadoAtual == estados.perdeu)
+        ativo = false;
+        window.clearInterval(parado);
+        
+}
   
 function clique(event) {
     if (estadoAtual == estados.jogando) 
@@ -225,9 +250,16 @@ document.addEventListener("keydown", function (teclas) {
 })
 
 
+tempo = +new Date(); 
+    parado = 0;
+    atualiza_tempo();
+    tempo_controle = window.setInterval(atualiza_tempo, 600);
+
+
 
 estadoAtual = estados.jogar;
 recorde = localStorage.getItem('recorde');
+
 
 if (recorde == null)
     recorde = 0;
@@ -240,6 +272,7 @@ if (recorde == null)
 
     imgObs = new Image();
     imgObs.src='img/obs.png'
+
 
 roda();
 } // main
